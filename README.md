@@ -2,6 +2,8 @@
 
 Track your Claude.ai subscription usage directly in VS Code with real-time quota monitoring.
 
+![CQT Logo](assets/CQT.png)
+
 ## Features
 
 - **Real-time Usage Tracking**: Monitor your Claude.ai quota usage directly in VS Code's status bar
