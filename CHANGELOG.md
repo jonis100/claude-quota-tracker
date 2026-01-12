@@ -1,0 +1,54 @@
+# Change Log
+
+All notable changes to the "Claude Quota Tracker" extension will be documented in this file.
+
+## [1.0.0] - 2026-01-12
+
+### Added
+- Initial release of Claude Quota Tracker
+- Real-time Claude.ai subscription usage tracking
+- Status bar integration with visual progress bars
+- 5-hour and 7-day usage window monitoring
+- Auto-refresh functionality with configurable intervals
+- Color-coded usage warnings (green/yellow/red)
+- Manual refresh command
+- Detailed usage information view
+- Session-based authentication with Claude.ai
+- Cloudflare bypass using Playwright browser automation
+- Browser session persistence for better performance
+- Configurable warning thresholds
+- Hover tooltips with detailed usage information and reset times
+
+### Features
+- **Status Bar Display**: Shows usage as `Claude: 5h ████████░░ 83% | 7d 22%`
+- **Visual Progress Bar**: Unicode-based progress bar for 5-hour window
+- **Dual Window Tracking**: Monitor both 5-hour and 7-day usage limits
+- **Smart Color Coding**: Visual indicators based on usage percentage
+- **Auto-Refresh**: Configurable refresh intervals (default: 5 minutes)
+- **Detailed View**: Click status bar for comprehensive usage statistics
+
+### Configuration
+- `claudeQuota.sessionKey`: Your Claude.ai session key from browser cookies
+- `claudeQuota.organizationId`: Your Claude.ai organization ID
+- `claudeQuota.refreshInterval`: Auto-refresh interval in milliseconds (default: 300000 / 5 minutes)
+- `claudeQuota.showInStatusBar`: Toggle status bar display (default: true)
+- `claudeQuota.warningThreshold`: Warning threshold percentage (default: 80)
+
+### Commands
+- `Claude Quota: Refresh Usage`: Manually refresh quota data
+- `Claude Quota: Show Details`: Display detailed usage information
+
+### Technical Details
+- Uses Playwright Chromium for Cloudflare bypass
+- Session persistence for improved performance
+- Direct integration with Claude.ai official API
+- Local credential storage in VS Code settings
+
+### Known Issues
+- Browser window briefly appears when fetching data (required for Cloudflare bypass)
+- Session keys expire periodically and need manual renewal
+- Requires Playwright Chromium installation (`npx playwright install chromium`)
+
+---
+
+**Note**: This extension is not officially affiliated with Anthropic. It's a community-built tool for tracking Claude.ai subscription usage.

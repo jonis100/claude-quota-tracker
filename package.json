@@ -1,0 +1,111 @@
+{
+  "name": "claude-quota-tracker",
+  "displayName": "Claude Quota Tracker",
+  "description": "Track your Claude.ai subscription usage with real-time quota monitoring in VS Code status bar",
+  "version": "1.0.0",
+  "publisher": "yonis",
+  "icon": "assets/CQT-128c.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jonis100/claude-quota-tracker"
+  },
+  "bugs": {
+    "url": "https://github.com/jonis100/claude-quota-tracker/issues"
+  },
+  "homepage": "https://github.com/jonis100/claude-quota-tracker#readme",
+  "keywords": [
+    "claude",
+    "anthropic",
+    "quota",
+    "usage",
+    "tracker",
+    "status bar",
+    "monitoring",
+    "claude-code",
+    "ai"
+  ],
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "claudeQuota.refresh",
+        "title": "Claude Quota: Refresh Usage"
+      },
+      {
+        "command": "claudeQuota.showDetails",
+        "title": "Claude Quota: Show Details"
+      }
+    ],
+    "configuration": {
+      "title": "Claude Quota Tracker",
+      "properties": {
+        "claudeQuota.sessionKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your Claude.ai session key (from browser cookies)",
+          "order": 1
+        },
+        "claudeQuota.organizationId": {
+          "type": "string",
+          "default": "",
+          "description": "Your Claude.ai organization ID",
+          "order": 2
+        },
+        "claudeQuota.refreshInterval": {
+          "type": "number",
+          "default": 300000,
+          "description": "Auto-refresh interval in milliseconds (default: 5 minutes)",
+          "order": 3
+        },
+        "claudeQuota.showInStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show quota usage in status bar",
+          "order": 4
+        },
+        "claudeQuota.warningThreshold": {
+          "type": "number",
+          "default": 80,
+          "description": "Warning threshold percentage (0-100)",
+          "order": 5
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "build": "tsc -p .",
+    "package": "npm run build && vsce package --out claude-quota-tracker-1.0.0.vsix",
+    "publish": "npm run build && vsce publish",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^18.x",
+    "@types/vscode": "^1.75.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vscode/vsce": "^3.7.1",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "https": "^1.0.0",
+    "playwright-core": "^1.40.0",
+    "vsce": "^2.15.0"
+  },
+  "author": "Yoni Shieber",
+  "license": "MIT"
+}
