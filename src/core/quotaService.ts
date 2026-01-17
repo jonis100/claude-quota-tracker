@@ -49,18 +49,26 @@ export class QuotaService {
   private async fetchWithPlaywright(): Promise<QuotaInfo> {
     try {
       if (!this.browser) {
-        this.browser = await chromium.launch({
-          headless: false,
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-blink-features=AutomationControlled',
-            '--window-size=1,1',
-            '--window-position=-9999,-9999',
-            '--disable-gpu',
-            '--disable-software-rasterizer',
-          ],
-        });
+        try {
+          this.browser = await chromium.launch({
+            headless: false,
+            args: [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-blink-features=AutomationControlled',
+              '--window-size=1,1',
+              '--window-position=-9999,-9999',
+              '--disable-gpu',
+              '--disable-software-rasterizer',
+            ],
+          });
+        } catch (launchError) {
+          const msg = launchError instanceof Error ? launchError.message : '';
+          if (msg.includes('executable') || msg.includes('Executable')) {
+            throw new Error('Playwright Chromium not installed. Please reload VS Code to trigger installation.');
+          }
+          throw launchError;
+        }
       }
 
       if (!this.context) {

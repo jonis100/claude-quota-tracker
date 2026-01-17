@@ -17,6 +17,7 @@ Track your Claude.ai subscription usage directly in VS Code with real-time quota
 
 1. Install the extension from the VS Code Marketplace
 2. Configure your Claude.ai credentials (see Configuration section below)
+3. On first launch, the extension will automatically install the required browser (this may take a moment)
 
 ## Configuration
 
@@ -119,8 +120,15 @@ Make sure you've set both credentials in Settings → Claude Quota
 
 Your session key may have expired. Get a fresh session key from browser cookies.
 
+### Playwright installation failed
+
+- Check you have write permissions to your home directory
+- Try manual installation: `npx playwright install chromium`
+- Reload VS Code after manual installation
+
 ## Known Issues
 
+- First launch may take longer while installing the required browser
 - A browser window briefly may appears when fetching data (required to bypass Cloudflare protection)
 - Session keys expire periodically and need to be updated
 
