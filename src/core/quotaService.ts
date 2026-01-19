@@ -1,11 +1,13 @@
 import { chromium, Browser, BrowserContext } from 'playwright-core';
 import { QuotaInfo, ClaudeUsageResponse } from '../utils/types';
+import { logger } from '../utils/logger';
 
 export class QuotaService {
   private sessionKey: string;
   private organizationId: string;
   private browser: Browser | null = null;
   private context: BrowserContext | null = null;
+  private usagePeriod: '5-hour' | '7-day' = '5-hour';
 
   constructor(sessionKey: string, organizationId: string) {
     this.sessionKey = this.parseSessionKey(sessionKey);
@@ -15,6 +17,10 @@ export class QuotaService {
   updateCredentials(sessionKey: string, organizationId: string) {
     this.sessionKey = this.parseSessionKey(sessionKey);
     this.organizationId = organizationId;
+  }
+
+  setUsagePeriod(period: '5-hour' | '7-day') {
+    this.usagePeriod = period;
   }
 
   /**
@@ -49,6 +55,7 @@ export class QuotaService {
   private async fetchWithPlaywright(): Promise<QuotaInfo> {
     try {
       if (!this.browser) {
+        logger.debug('QuotaService', 'Launching Chromium browser');
         this.browser = await chromium.launch({
           headless: false,
           args: [
@@ -56,9 +63,15 @@ export class QuotaService {
             '--disable-setuid-sandbox',
             '--disable-blink-features=AutomationControlled',
             '--window-size=1,1',
-            '--window-position=-9999,-9999',
+            '--window-position=-2400,-2400',
             '--disable-gpu',
             '--disable-software-rasterizer',
+            '--disable-dev-shm-usage',
+            '--no-first-run',
+            '--no-default-browser-check',
+            '--disable-infobars',
+            '--disable-extensions',
+            '--mute-audio',
           ],
         });
       }
@@ -140,12 +153,25 @@ export class QuotaService {
     let periodType = '';
     let resetsAt = '';
 
-    if (data.five_hour) {
+    // Use the configured usage period preference
+    if (this.usagePeriod === '5-hour' && data.five_hour) {
+      utilization = data.five_hour.utilization;
+      resetDate = new Date(data.five_hour.resets_at);
+      periodType = '5-hour window';
+      resetsAt = data.five_hour.resets_at;
+    } else if (this.usagePeriod === '7-day' && data.seven_day) {
+      utilization = data.seven_day.utilization;
+      resetDate = new Date(data.seven_day.resets_at);
+      periodType = '7-day window';
+      resetsAt = data.seven_day.resets_at;
+    } else if (data.five_hour) {
+      // Fallback to 5-hour if preferred period not available
       utilization = data.five_hour.utilization;
       resetDate = new Date(data.five_hour.resets_at);
       periodType = '5-hour window';
       resetsAt = data.five_hour.resets_at;
     } else if (data.seven_day) {
+      // Fallback to 7-day if 5-hour not available
       utilization = data.seven_day.utilization;
       resetDate = new Date(data.seven_day.resets_at);
       periodType = '7-day window';

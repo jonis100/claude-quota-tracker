@@ -2,6 +2,28 @@
 
 All notable changes to the "Claude Quota Tracker" extension will be documented in this file.
 
+## [1.0.1] - 2026-01-19
+
+### Added
+- **Automatic Chromium Installation**: Extension now prompts users to install Chromium if not available
+- **Chromium Verification**: Added file existence check to ensure Chromium is properly installed
+- **Usage Period Selection**: New setting to choose between 5-hour or 7-day as primary display in status bar
+  - Both periods still visible, but selected one shows with progress bar
+  - Configurable via `claudeQuota.usagePeriod` setting
+
+### Changed
+- **Default Refresh Interval**: Increased from 5 minutes to 10 minutes (600000ms) to reduce API calls and user interruptions
+- **Improved Browser Stealth**: Enhanced browser flags for better invisibility while avoiding detection
+- **Better Error Handling**: Clearer error messages when Chromium is not available
+
+### Fixed
+- Fixed chromium availability check returning cached results after installation
+- Fixed initial quota fetch attempting to run before chromium installation completes
+- Improved startup flow to properly handle missing chromium installation
+
+### Configuration
+- `claudeQuota.usagePeriod`: Choose between "5-hour" (default) or "7-day" as primary display period
+
 ## [1.0.0] - 2026-01-12
 
 ### Added

@@ -2,7 +2,7 @@
   "name": "claude-quota-tracker",
   "displayName": "Claude Quota Tracker",
   "description": "Track your Claude.ai subscription usage with real-time quota monitoring in VS Code status bar",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "yonis",
   "icon": "assets/CQT-128c.png",
   "repository": {
@@ -62,8 +62,8 @@
         },
         "claudeQuota.refreshInterval": {
           "type": "number",
-          "default": 300000,
-          "description": "Auto-refresh interval in milliseconds (default: 5 minutes)",
+          "default": 600000,
+          "description": "Auto-refresh interval in milliseconds (default: 10 minutes)",
           "order": 3
         },
         "claudeQuota.showInStatusBar": {
@@ -77,6 +77,16 @@
           "default": 80,
           "description": "Warning threshold percentage (0-100)",
           "order": 5
+        },
+        "claudeQuota.usagePeriod": {
+          "type": "string",
+          "enum": [
+            "5-hour",
+            "7-day"
+          ],
+          "default": "5-hour",
+          "description": "Usage period to display in status bar (5-hour window or 7-day window)",
+          "order": 6
         }
       }
     }
@@ -85,7 +95,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "build": "tsc -p .",
-    "package": "npm run build && vsce package --out claude-quota-tracker-1.0.0.vsix",
+    "package": "npm run build && vsce package",
     "publish": "npm run build && vsce publish",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",

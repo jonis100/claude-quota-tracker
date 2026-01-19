@@ -8,7 +8,9 @@ Track your Claude.ai subscription usage directly in VS Code with real-time quota
 
 - **Real-time Usage Tracking**: Monitor your Claude.ai quota usage directly in VS Code's status bar
 - **Visual Progress Bar**: See your 5-hour and 7-day usage limits at a glance with visual progress bars
-- **Auto-refresh**: Configurable auto-refresh intervals (default: 5 minutes)
+- **Automatic Chromium Setup**: Extension automatically prompts to install Chromium if not available
+- **Flexible Display Options**: Choose between 5-hour or 7-day as primary display period
+- **Auto-refresh**: Configurable auto-refresh intervals (default: 10 minutes)
 - **Color-coded Warnings**: Status bar changes color based on usage thresholds
 - **Detailed Tooltips**: Hover for detailed usage information and reset times
 - **Manual Refresh**: Click the status bar to manually refresh quota data
@@ -16,7 +18,8 @@ Track your Claude.ai subscription usage directly in VS Code with real-time quota
 ## Installation
 
 1. Install the extension from the VS Code Marketplace
-2. Configure your Claude.ai credentials (see Configuration section below)
+2. If prompted, allow the extension to install Chromium browser (required for fetching quota data)
+3. Configure your Claude.ai credentials (see Configuration section below)
 
 ## Configuration
 
@@ -56,7 +59,8 @@ To use this extension, you need two values from your Claude.ai account:
 2. Search for "Claude Quota"
 3. Set your `Session Key` and `Organization ID`
 4. Optionally configure:
-   - **Refresh Interval**: How often to check usage (in minutes, default: 5)
+   - **Usage Period**: Choose "5-hour" (default) or "7-day" as primary display with progress bar
+   - **Refresh Interval**: How often to check usage (in milliseconds, default: 600000 / 10 minutes)
    - **Warning Threshold**: When to show yellow/red warning (default: 80%)
 
 Alternatively, add these to your `settings.json`:
@@ -65,7 +69,8 @@ Alternatively, add these to your `settings.json`:
 {
   "claudeQuota.sessionKey": "sk-ant-sid01-YOUR_SESSION_KEY_HERE",
   "claudeQuota.organizationId": "your-org-id-here",
-  "claudeQuota.refreshInterval": 5,
+  "claudeQuota.usagePeriod": "5-hour",
+  "claudeQuota.refreshInterval": 600000,
   "claudeQuota.warningThreshold": 80
 }
 ```
@@ -95,6 +100,7 @@ Access via Command Palette (Ctrl/Cmd + Shift + P):
 - Active Claude.ai subscription
 - Valid session credentials
 - Internet connection
+- Chromium browser (automatically installed by extension if not available)
 
 ## Privacy & Security
 
@@ -104,6 +110,10 @@ Access via Command Palette (Ctrl/Cmd + Shift + P):
 - **Note**: Your session key is sensitive - treat it like a password
 
 ## Troubleshooting
+
+### "Chromium required" error
+
+If you see this error, click on it and choose "Install Now" to automatically install Chromium. Alternatively, run `npx playwright install chromium` in your terminal.
 
 ### "Session key and organization ID not configured"
 
@@ -121,20 +131,12 @@ Your session key may have expired. Get a fresh session key from browser cookies.
 
 ## Known Issues
 
-- A browser window briefly may appears when fetching data (required to bypass Cloudflare protection)
-- Session keys expire periodically and need to be updated
+- A tiny browser window (1x1 pixel) positioned off-screen may briefly appear when fetching data (required to bypass Cloudflare protection)
+- Session keys expire periodically and need to be updated manually
 
 ## Release Notes
 
-### 1.0.0
-
-Initial release:
-
-- Real-time Claude.ai quota tracking
-- 5-hour and 7-day usage windows with visual progress bars
-- Auto-refresh functionality
-- Color-coded usage warnings
-- Configurable thresholds and intervals
+See [CHANGELOG.md](CHANGELOG.md) for detailed release notes and version history.
 
 ## Support
 
