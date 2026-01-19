@@ -3,6 +3,7 @@ import { QuotaService } from './core/quotaService';
 import { StatusBarManager } from './ui/statusBar';
 import { logger } from './utils/logger';
 import { QuotaInfo } from './utils/types';
+import { ensureChromiumAvailable } from './utils/chromiumService';
 
 let quotaService: QuotaService | null = null;
 let statusBarManager: StatusBarManager | null = null;
@@ -21,9 +22,11 @@ export function activate(context: vscode.ExtensionContext) {
   const config = vscode.workspace.getConfiguration('claudeQuota');
   const sessionKey = config.get<string>('sessionKey', '');
   const organizationId = config.get<string>('organizationId', '');
+  const usagePeriod = config.get<'5-hour' | '7-day'>('usagePeriod', '5-hour');
 
     logger.info('Extension', 'Creating QuotaService');
     quotaService = new QuotaService(sessionKey, organizationId);
+    quotaService.setUsagePeriod(usagePeriod);
     logger.info('Extension', 'QuotaService created');
 
   const refreshCommand = vscode.commands.registerCommand(
@@ -63,15 +66,20 @@ export function activate(context: vscode.ExtensionContext) {
   statusBarManager.updateQuota(null);
   statusBarManager.show();
 
-  setImmediate(() => {
+  setImmediate(async () => {
+    const chromiumAvailable = await ensureChromiumAvailable(vscode);
+
     setupAutoRefresh();
 
-    if (sessionKey && organizationId) {
+    if (sessionKey && organizationId && chromiumAvailable) {
       setTimeout(() => {
         refreshQuota().catch(err => {
           logger.error('Extension', 'Initial quota fetch failed', err);
         });
       }, 2000);
+    } else if (!chromiumAvailable) {
+      logger.warn('Extension', 'Chromium not available, skipping initial quota fetch');
+      statusBarManager?.showError('Chromium required');
     }
   });
 
@@ -89,6 +97,12 @@ async function refreshQuota() {
 
   if (!sessionKey || !organizationId) {
     statusBarManager.updateQuota(null);
+    return;
+  }
+
+  if (!await ensureChromiumAvailable(vscode)) {
+    statusBarManager.showError('Chromium required');
+    logger.error('Quota', 'Chromium not available, cannot fetch quota');
     return;
   }
 
@@ -182,15 +196,18 @@ function handleConfigurationChange() {
   const sessionKey = config.get<string>('sessionKey', '');
   const organizationId = config.get<string>('organizationId', '');
   const showInStatusBar = config.get<boolean>('showInStatusBar', true);
+  const usagePeriod = config.get<'5-hour' | '7-day'>('usagePeriod', '5-hour');
 
   logger.debug('Config', 'New configuration', {
     hasSessionKey: !!sessionKey,
     hasOrganizationId: !!organizationId,
-    showInStatusBar
+    showInStatusBar,
+    usagePeriod
   });
 
   if (quotaService) {
     quotaService.updateCredentials(sessionKey, organizationId);
+    quotaService.setUsagePeriod(usagePeriod);
   }
 
   if (statusBarManager) {
