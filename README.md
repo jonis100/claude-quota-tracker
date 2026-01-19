@@ -9,10 +9,11 @@ Track your Claude.ai subscription usage directly in VS Code with real-time quota
 ## Why Use This Extension?
 
 If you're using **Claude Code** extension for AI-powered coding assistance, this tracker helps you:
-- 📊 Monitor your quota consumption in real-time
-- ⚠️ Get warnings before hitting usage limits
-- 🎯 Optimize your Claude usage throughout the day
-- 📈 Track both 5-hour and 7-day usage windows
+
+- Monitor your quota consumption in real-time
+- Get warnings before hitting usage limits
+- Optimize your Claude usage throughout the day
+- Track both 5-hour and 7-day usage windows
 
 ## Features
 
