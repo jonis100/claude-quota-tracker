@@ -2,7 +2,17 @@
 
 Track your Claude.ai subscription usage directly in VS Code with real-time quota monitoring.
 
+**Perfect companion for [Claude Code](https://marketplace.visualstudio.com/items?itemName=Anthropic.claude-code) users!** Stay on top of your usage while coding with Claude's AI assistance.
+
 ![CQT Logo](assets/CQT.png)
+
+## Why Use This Extension?
+
+If you're using **Claude Code** extension for AI-powered coding assistance, this tracker helps you:
+- 📊 Monitor your quota consumption in real-time
+- ⚠️ Get warnings before hitting usage limits
+- 🎯 Optimize your Claude usage throughout the day
+- 📈 Track both 5-hour and 7-day usage windows
 
 ## Features
 
