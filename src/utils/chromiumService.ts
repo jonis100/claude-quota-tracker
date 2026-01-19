@@ -1,3 +1,17 @@
+/**
+ * Chromium Service
+ *
+ * Playwright Chromium is installed into the user cache directory (e.g., ~/.cache/ms-playwright)
+ * rather than inside the extension or node_modules.
+ * This ensures:
+ *   - Chromium is shared across projects and extensions
+ *   - The extension package stays small
+ *   - Users don't need to reinstall it every time
+ *
+ * NOTE: Uninstalling this extension does NOT remove Chromium from the cache,
+ * and that is intentional. The cache may be used by other projects or extensions.
+ */
+
 import { chromium } from 'playwright-core';
 import { logger } from './logger';
 import { exec } from 'child_process';
