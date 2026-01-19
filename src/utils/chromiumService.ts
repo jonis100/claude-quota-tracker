@@ -91,7 +91,24 @@ async function promptChromiumInstallation(vscode: typeof import('vscode')): Prom
   );
 
   if (selection === 'Install Now') {
-    await vscode.window.withProgress(
+    await installChromiumWithProgress(vscode);
+  } else if (selection === 'Learn More') {
+    const choice = await vscode.window.showInformationMessage(
+      'Claude Quota Tracker uses Playwright to fetch your Claude.ai usage data.\n\n' +
+      'To install Chromium manually, run:\nnpx playwright install chromium',
+      'Install Now'
+    );
+    if (choice === 'Install Now') {
+      await installChromiumWithProgress(vscode);
+    }
+  }
+}
+
+/**
+ * Installs Chromium with a VS Code progress notification UI
+ */
+async function installChromiumWithProgress(vscode: typeof import('vscode')): Promise<void> {
+      await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
         title: 'Installing Chromium',
@@ -117,14 +134,4 @@ async function promptChromiumInstallation(vscode: typeof import('vscode')): Prom
         }
       }
     );
-  } else if (selection === 'Learn More') {
-    const choice = await vscode.window.showInformationMessage(
-      'Claude Quota Tracker uses Playwright to fetch your Claude.ai usage data.\n\n' +
-      'To install Chromium manually, run:\nnpx playwright install chromium',
-      'Install Now'
-    );
-    if (choice === 'Install Now') {
-      await promptChromiumInstallation(vscode);
-    }
   }
-}
