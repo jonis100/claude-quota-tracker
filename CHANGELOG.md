@@ -2,6 +2,32 @@
 
 All notable changes to the "Claude Quota Tracker" extension will be documented in this file.
 
+## [1.0.2] - 2026-01-22
+
+### Fixed
+- **Cloudflare Protection**: Fixed fetch requests being blocked by Cloudflare
+  - Improved browser automation stealth to avoid detection
+  - Enhanced challenge detection and handling
+  - Increased timeouts to accommodate security checks
+  - Better error handling and response parsing
+- **Excessive API Requests**: Fixed multiple concurrent requests being sent
+  - Added concurrent fetch protection to prevent overlapping requests
+  - Implemented rate limiting with 10-second minimum interval between fetches
+  - Added configuration change debouncing (500ms delay)
+  - Fixed multiple auto-refresh timers being created simultaneously
+  - Added validation to ensure refresh interval respects minimum threshold
+- **Timer Management**: Fixed timer cleanup and memory leak issues
+  - Properly clears existing timers before creating new ones
+  - Cleanup on extension deactivation
+
+### Changed
+- **Fetch Implementation**: Enhanced reliability and error handling
+- **Logging**: Improved debug logging for troubleshooting
+
+### Technical Details
+- Rate limiting prevents requests faster than every 10 seconds
+- All timers properly cleared on configuration changes and deactivation
+
 ## [1.0.1] - 2026-01-19
 
 ### Added

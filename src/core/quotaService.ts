@@ -72,14 +72,15 @@ export class QuotaService {
             '--disable-infobars',
             '--disable-extensions',
             '--mute-audio',
+            '--disable-web-security',
+            '--disable-features=IsolateOrigins,site-per-process',
           ],
         });
       }
 
       if (!this.context) {
         this.context = await this.browser.newContext({
-          userAgent: 'Mozilla/5.0 (Macintosh; Apple Silicon Mac OS X 14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.6674.92 Safari/537.36',
-          viewport: { width: 1, height: 1 },
+          userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
           locale: 'en-US',
           timezoneId: 'America/New_York',
         });
@@ -107,31 +108,92 @@ export class QuotaService {
 
       const page = await this.context.newPage();
 
+      // Hide webdriver and automation flags
+      await page.addInitScript(`
+        // Override the navigator.webdriver property
+        Object.defineProperty(navigator, 'webdriver', {
+          get: () => false,
+        });
+
+        // Override the permissions query
+        const originalQuery = window.navigator.permissions.query;
+        window.navigator.permissions.query = (parameters) => (
+          parameters.name === 'notifications' ?
+            Promise.resolve({ state: Notification.permission }) :
+            originalQuery(parameters)
+        );
+
+        // Add chrome object if not present
+        if (!window.chrome) {
+          window.chrome = {
+            runtime: {},
+          };
+        }
+      `);
+
+      logger.debug('QuotaService', 'Navigating to claude.ai...');
       await page.goto('https://claude.ai/', {
         waitUntil: 'domcontentloaded',
-        timeout: 15000,
+        timeout: 30000,
       });
 
-      await page.waitForTimeout(1000);
+      logger.debug('QuotaService', 'Waiting for Cloudflare challenge to complete...');
+      // Wait for Cloudflare challenge to complete
+      try {
+        await page.waitForFunction(`
+          () => {
+            // Check if we're past the Cloudflare page
+            const body = document.body.innerText;
+            return !body.includes('Verifying you are human') &&
+                   !body.includes('claude.ai needs to review the security');
+          }
+        `, { timeout: 30000 });
+        logger.debug('QuotaService', 'Cloudflare challenge passed!');
+      } catch (error) {
+        logger.debug('QuotaService', 'Cloudflare challenge may still be present, continuing anyway...');
+      }
+
+      logger.debug('QuotaService', 'Waiting for page to fully settle...');
+      await page.waitForTimeout(3000);
 
       const url = `https://claude.ai/api/organizations/${this.organizationId}/usage`;
 
       const result = await page.evaluate(async (apiUrl: string) => {
-        const response = await fetch(apiUrl, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'accept': '*/*',
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            'anthropic-client-platform': 'web_claude_ai',
-          },
-        });
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+              'accept': '*/*',
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              'anthropic-client-platform': 'web_claude_ai',
+            },
+          });
 
-        return {
-          status: response.status,
-          statusText: response.statusText,
-          data: response.ok ? await response.json() : await response.text(),
-        };
+          const headers: Record<string, string> = {};
+          response.headers.forEach((value, key) => {
+            headers[key] = value;
+          });
+
+          let data;
+          const contentType = response.headers.get('content-type');
+          if (contentType?.includes('application/json')) {
+            data = await response.json();
+          } else {
+            data = await response.text();
+          }
+
+          return {
+            status: response.status,
+            statusText: response.statusText,
+            headers,
+            data,
+          };
+        } catch (error) {
+          return {
+            error: error instanceof Error ? error.message : String(error),
+          };
+        }
       }, url);
 
       await page.close();

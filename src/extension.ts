@@ -9,6 +9,10 @@ let quotaService: QuotaService | null = null;
 let statusBarManager: StatusBarManager | null = null;
 let refreshTimer: NodeJS.Timeout | null = null;
 let currentQuota: QuotaInfo | null = null;
+let isFetching: boolean = false;
+let lastFetchTime: number = 0;
+let configChangeTimeout: NodeJS.Timeout | undefined = undefined;
+const MIN_FETCH_INTERVAL = 10000;
 
 export function activate(context: vscode.ExtensionContext) {
   logger.init(context);
@@ -54,13 +58,17 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(refreshCommand, showDetailsCommand, showLogsCommand);
 
-  context.subscriptions.push(
-    vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration('claudeQuota')) {
-        handleConfigurationChange();
-      }
-    })
-  );
+context.subscriptions.push(
+  vscode.workspace.onDidChangeConfiguration(e => {
+    if (!e.affectsConfiguration('claudeQuota')) return;
+
+    clearTimeout(configChangeTimeout);
+    configChangeTimeout = setTimeout(() => {
+      handleConfigurationChange();
+      configChangeTimeout = undefined;
+    }, 500);
+  })
+);
 
   // Show status bar with N/A initially
   statusBarManager.updateQuota(null);
@@ -91,6 +99,20 @@ async function refreshQuota() {
     return;
   }
 
+  // Prevent concurrent fetches
+  if (isFetching) {
+    logger.debug('Quota', 'Fetch already in progress, skipping...');
+    return;
+  }
+
+  // Rate limit: prevent fetches within MIN_FETCH_INTERVAL
+  const now = Date.now();
+  if (now - lastFetchTime < MIN_FETCH_INTERVAL) {
+    const waitTime = Math.ceil((MIN_FETCH_INTERVAL - (now - lastFetchTime)) / 1000);
+    logger.debug('Quota', `Rate limited: please wait ${waitTime} more seconds`);
+    return;
+  }
+
   const config = vscode.workspace.getConfiguration('claudeQuota');
   const sessionKey = config.get<string>('sessionKey', '');
   const organizationId = config.get<string>('organizationId', '');
@@ -107,9 +129,11 @@ async function refreshQuota() {
   }
 
   try {
+    isFetching = true;
     statusBarManager.showLoading();
     logger.debug('Quota', 'Fetching quota data...');
     currentQuota = await quotaService.fetchQuota();
+    lastFetchTime = Date.now();
     logger.debug('Quota', 'Quota data received', {
       usage: currentQuota?.usage,
       limit: currentQuota?.limit,
@@ -123,6 +147,8 @@ async function refreshQuota() {
     vscode.window.showErrorMessage(
       `Claude Quota: ${errorMessage}. Please check your credentials in settings.`
     );
+  } finally {
+    isFetching = false;
   }
 }
 
@@ -218,13 +244,18 @@ function handleConfigurationChange() {
     }
   }
 
-  refreshQuota();
-
+  // Always setup auto-refresh (it clears existing timer to prevent duplicates)
   setupAutoRefresh();
+
+  // Trigger refresh - rate limiting will prevent excessive calls
+  logger.debug('Config', 'Triggering quota refresh');
+  refreshQuota();
 }
 
 function setupAutoRefresh() {
+  // Clear any existing timer first
   if (refreshTimer) {
+    logger.debug('AutoRefresh', 'Clearing existing auto-refresh timer');
     clearInterval(refreshTimer);
     refreshTimer = null;
   }
@@ -232,14 +263,24 @@ function setupAutoRefresh() {
   const config = vscode.workspace.getConfiguration('claudeQuota');
   const refreshInterval = config.get<number>('refreshInterval', 300000);
 
-  logger.debug('AutoRefresh', `Setting up auto-refresh with interval: ${refreshInterval}ms`);
-
-  if (refreshInterval > 0) {
-    refreshTimer = setInterval(() => {
-      logger.debug('AutoRefresh', 'Auto-refresh triggered');
-      refreshQuota();
-    }, refreshInterval);
+  // Don't set up auto-refresh if interval is less than minimum or disabled
+  if (refreshInterval <= 0) {
+    logger.debug('AutoRefresh', 'Auto-refresh disabled (interval <= 0)');
+    return;
   }
+
+  // Ensure refresh interval is at least MIN_FETCH_INTERVAL
+  if (refreshInterval < MIN_FETCH_INTERVAL) {
+    logger.warn('AutoRefresh', `Refresh interval (${refreshInterval}ms) is less than minimum (${MIN_FETCH_INTERVAL}ms). Auto-refresh disabled.`);
+    return;
+  }
+
+  logger.debug('AutoRefresh', `Setting up auto-refresh with interval: ${refreshInterval}ms (${refreshInterval / 1000}s)`);
+
+  refreshTimer = setInterval(() => {
+    logger.debug('AutoRefresh', 'Auto-refresh triggered');
+    refreshQuota();
+  }, refreshInterval);
 }
 
 function formatNumber(num: number): string {
@@ -252,6 +293,11 @@ export async function deactivate() {
   if (refreshTimer) {
     clearInterval(refreshTimer);
     refreshTimer = null;
+  }
+
+  if (configChangeTimeout) {
+    clearTimeout(configChangeTimeout);
+    configChangeTimeout = undefined;
   }
 
   if (quotaService) {
