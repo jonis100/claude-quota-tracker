@@ -9,6 +9,7 @@ Track your Claude.ai subscription usage directly in VS Code with real-time quota
 ## Why Use This Extension?
 
 If you're using **Claude Code** extension for AI-powered coding assistance, this tracker helps you:
+
 - 📊 Monitor your quota consumption in real-time
 - ⚠️ Get warnings before hitting usage limits
 - 🎯 Optimize your Claude usage throughout the day
@@ -20,7 +21,7 @@ If you're using **Claude Code** extension for AI-powered coding assistance, this
 - **Visual Progress Bar**: See your 5-hour and 7-day usage limits at a glance with visual progress bars
 - **Automatic Chromium Setup**: Extension automatically prompts to install Chromium if not available
 - **Flexible Display Options**: Choose between 5-hour or 7-day as primary display period
-- **Auto-refresh**: Configurable auto-refresh intervals (default: 10 minutes)
+- **Auto-refresh**: Configurable auto-refresh intervals (default: 5 minutes)
 - **Color-coded Warnings**: Status bar changes color based on usage thresholds
 - **Detailed Tooltips**: Hover for detailed usage information and reset times
 - **Manual Refresh**: Click the status bar to manually refresh quota data
@@ -70,7 +71,7 @@ To use this extension, you need two values from your Claude.ai account:
 3. Set your `Session Key` and `Organization ID`
 4. Optionally configure:
    - **Usage Period**: Choose "5-hour" (default) or "7-day" as primary display with progress bar
-   - **Refresh Interval**: How often to check usage (in milliseconds, default: 600000 / 10 minutes)
+   - **Refresh Interval**: How often to check usage (in milliseconds, default: 300000 / 5 minutes)
    - **Warning Threshold**: When to show yellow/red warning (default: 80%)
 
 Alternatively, add these to your `settings.json`:
@@ -80,7 +81,7 @@ Alternatively, add these to your `settings.json`:
   "claudeQuota.sessionKey": "sk-ant-sid01-YOUR_SESSION_KEY_HERE",
   "claudeQuota.organizationId": "your-org-id-here",
   "claudeQuota.usagePeriod": "5-hour",
-  "claudeQuota.refreshInterval": 600000,
+  "claudeQuota.refreshInterval": 300000,
   "claudeQuota.warningThreshold": 80
 }
 ```

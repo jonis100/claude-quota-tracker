@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export enum LogLevel {
   DEBUG = 0,
@@ -10,11 +10,13 @@ export enum LogLevel {
 class Logger {
   private output_channel: vscode.OutputChannel | null = null;
   private log_level: LogLevel = LogLevel.DEBUG;
-  private prefix = '[ClaudeQuota]';
+  private prefix = "[ClaudeQuota]";
 
   init(context?: vscode.ExtensionContext) {
     if (!this.output_channel) {
-      this.output_channel = vscode.window.createOutputChannel('Claude Quota Tracker');
+      this.output_channel = vscode.window.createOutputChannel(
+        "Claude Quota Tracker",
+      );
       if (context) {
         context.subscriptions.push(this.output_channel);
       }
@@ -29,7 +31,12 @@ class Logger {
     this.output_channel?.show();
   }
 
-  private log(level: LogLevel, category: string, message: string, ...args: any[]) {
+  private log(
+    level: LogLevel,
+    category: string,
+    message: string,
+    ...args: any[]
+  ) {
     if (level < this.log_level) {
       return;
     }
@@ -38,7 +45,12 @@ class Logger {
     const level_str = LogLevel[level].padEnd(5);
     const formatted = `${timestamp} ${level_str} ${this.prefix}[${category}] ${message}`;
 
-    const console_method = level === LogLevel.ERROR ? console.error : level === LogLevel.WARN ? console.warn : console.log;
+    const console_method =
+      level === LogLevel.ERROR
+        ? console.error
+        : level === LogLevel.WARN
+          ? console.warn
+          : console.log;
     if (args.length > 0) {
       console_method(formatted, ...args);
     } else {
@@ -48,8 +60,8 @@ class Logger {
     if (this.output_channel) {
       if (args.length > 0) {
         const args_str = args
-          .map(arg => {
-            if (typeof arg === 'object') {
+          .map((arg) => {
+            if (typeof arg === "object") {
               try {
                 return JSON.stringify(arg, null, 2);
               } catch {
@@ -58,7 +70,7 @@ class Logger {
             }
             return String(arg);
           })
-          .join(' ');
+          .join(" ");
         this.output_channel.appendLine(`${formatted} ${args_str}`);
       } else {
         this.output_channel.appendLine(formatted);
@@ -83,7 +95,7 @@ class Logger {
   }
 
   section(category: string, title: string) {
-    const divider = '='.repeat(60);
+    const divider = "=".repeat(60);
     this.debug(category, divider);
     this.debug(category, title);
     this.debug(category, divider);
@@ -91,10 +103,10 @@ class Logger {
 
   time_start(label: string): () => void {
     const start = Date.now();
-    this.debug('PERF', `Timer started: ${label}`);
+    this.debug("PERF", `Timer started: ${label}`);
     return () => {
       const elapsed = Date.now() - start;
-      this.debug('PERF', `Timer ended: ${label} (${elapsed}ms)`);
+      this.debug("PERF", `Timer ended: ${label} (${elapsed}ms)`);
     };
   }
 }

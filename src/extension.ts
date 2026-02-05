@@ -1,9 +1,9 @@
-import * as vscode from 'vscode';
-import { QuotaService } from './core/quotaService';
-import { StatusBarManager } from './ui/statusBar';
-import { logger } from './utils/logger';
-import { QuotaInfo } from './utils/types';
-import { ensureChromiumAvailable } from './utils/chromiumService';
+import * as vscode from "vscode";
+import { QuotaService } from "./core/quotaService";
+import { StatusBarManager } from "./ui/statusBar";
+import { logger } from "./utils/logger";
+import { QuotaInfo } from "./utils/types";
+import { ensureChromiumAvailable } from "./utils/chromiumService";
 
 let quotaService: QuotaService | null = null;
 let statusBarManager: StatusBarManager | null = null;
@@ -16,59 +16,68 @@ const MIN_FETCH_INTERVAL = 10000;
 
 export function activate(context: vscode.ExtensionContext) {
   logger.init(context);
-  logger.section('Extension', 'Claude Quota Tracker Activating');
-  logger.info('Extension', `VS Code Version: ${vscode.version}`);
-  logger.info('Extension', `Extension activating at: ${new Date().toISOString()}`);
+  logger.section("Extension", "Claude Quota Tracker Activating");
+  logger.info("Extension", `VS Code Version: ${vscode.version}`);
+  logger.info(
+    "Extension",
+    `Extension activating at: ${new Date().toISOString()}`,
+  );
 
   statusBarManager = new StatusBarManager();
   context.subscriptions.push(statusBarManager);
 
-  const config = vscode.workspace.getConfiguration('claudeQuota');
-  const sessionKey = config.get<string>('sessionKey', '');
-  const organizationId = config.get<string>('organizationId', '');
-  const usagePeriod = config.get<'5-hour' | '7-day'>('usagePeriod', '5-hour');
+  const config = vscode.workspace.getConfiguration("claudeQuota");
+  const sessionKey = config.get<string>("sessionKey", "");
+  const organizationId = config.get<string>("organizationId", "");
+  const usagePeriod = config.get<"5-hour" | "7-day">("usagePeriod", "5-hour");
 
-    logger.info('Extension', 'Creating QuotaService');
-    quotaService = new QuotaService(sessionKey, organizationId);
-    quotaService.setUsagePeriod(usagePeriod);
-    logger.info('Extension', 'QuotaService created');
+  logger.info("Extension", "Creating QuotaService");
+  quotaService = new QuotaService(sessionKey, organizationId);
+  quotaService.setUsagePeriod(usagePeriod);
+  logger.info("Extension", "QuotaService created");
 
   const refreshCommand = vscode.commands.registerCommand(
-    'claudeQuota.refresh',
+    "claudeQuota.refresh",
     async () => {
       await refreshQuota();
-    }
+    },
   );
 
   const showDetailsCommand = vscode.commands.registerCommand(
-    'claudeQuota.showDetails',
+    "claudeQuota.showDetails",
     () => {
       showQuotaDetails();
-    }
+    },
   );
 
   const showLogsCommand = vscode.commands.registerCommand(
-    'claudeQuota.showLogs',
+    "claudeQuota.showLogs",
     () => {
-      logger.info('Extension', 'Opening debug log panel');
+      logger.info("Extension", "Opening debug log panel");
       logger.show();
-      vscode.window.showInformationMessage('Debug log panel opened');
-    }
+      vscode.window.showInformationMessage("Debug log panel opened");
+    },
   );
 
-  context.subscriptions.push(refreshCommand, showDetailsCommand, showLogsCommand);
+  context.subscriptions.push(
+    refreshCommand,
+    showDetailsCommand,
+    showLogsCommand,
+  );
 
-context.subscriptions.push(
-  vscode.workspace.onDidChangeConfiguration(e => {
-    if (!e.affectsConfiguration('claudeQuota')) return;
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (!e.affectsConfiguration("claudeQuota")) {
+        return;
+      }
 
-    clearTimeout(configChangeTimeout);
-    configChangeTimeout = setTimeout(() => {
-      handleConfigurationChange();
-      configChangeTimeout = undefined;
-    }, 500);
-  })
-);
+      clearTimeout(configChangeTimeout);
+      configChangeTimeout = setTimeout(() => {
+        handleConfigurationChange();
+        configChangeTimeout = undefined;
+      }, 500);
+    }),
+  );
 
   // Show status bar with N/A initially
   statusBarManager.updateQuota(null);
@@ -81,17 +90,20 @@ context.subscriptions.push(
 
     if (sessionKey && organizationId && chromiumAvailable) {
       setTimeout(() => {
-        refreshQuota().catch(err => {
-          logger.error('Extension', 'Initial quota fetch failed', err);
+        refreshQuota().catch((err) => {
+          logger.error("Extension", "Initial quota fetch failed", err);
         });
       }, 2000);
     } else if (!chromiumAvailable) {
-      logger.warn('Extension', 'Chromium not available, skipping initial quota fetch');
-      statusBarManager?.showError('Chromium required');
+      logger.warn(
+        "Extension",
+        "Chromium not available, skipping initial quota fetch",
+      );
+      statusBarManager?.showError("Chromium required");
     }
   });
 
-  logger.info('Extension', 'Claude Quota Tracker activated successfully');
+  logger.info("Extension", "Claude Quota Tracker activated successfully");
 }
 
 async function refreshQuota() {
@@ -101,51 +113,54 @@ async function refreshQuota() {
 
   // Prevent concurrent fetches
   if (isFetching) {
-    logger.debug('Quota', 'Fetch already in progress, skipping...');
+    logger.debug("Quota", "Fetch already in progress, skipping...");
     return;
   }
 
   // Rate limit: prevent fetches within MIN_FETCH_INTERVAL
   const now = Date.now();
   if (now - lastFetchTime < MIN_FETCH_INTERVAL) {
-    const waitTime = Math.ceil((MIN_FETCH_INTERVAL - (now - lastFetchTime)) / 1000);
-    logger.debug('Quota', `Rate limited: please wait ${waitTime} more seconds`);
+    const waitTime = Math.ceil(
+      (MIN_FETCH_INTERVAL - (now - lastFetchTime)) / 1000,
+    );
+    logger.debug("Quota", `Rate limited: please wait ${waitTime} more seconds`);
     return;
   }
 
-  const config = vscode.workspace.getConfiguration('claudeQuota');
-  const sessionKey = config.get<string>('sessionKey', '');
-  const organizationId = config.get<string>('organizationId', '');
+  const config = vscode.workspace.getConfiguration("claudeQuota");
+  const sessionKey = config.get<string>("sessionKey", "");
+  const organizationId = config.get<string>("organizationId", "");
 
   if (!sessionKey || !organizationId) {
     statusBarManager.updateQuota(null);
     return;
   }
 
-  if (!await ensureChromiumAvailable(vscode)) {
-    statusBarManager.showError('Chromium required');
-    logger.error('Quota', 'Chromium not available, cannot fetch quota');
+  if (!(await ensureChromiumAvailable(vscode))) {
+    statusBarManager.showError("Chromium required");
+    logger.error("Quota", "Chromium not available, cannot fetch quota");
     return;
   }
 
   try {
     isFetching = true;
     statusBarManager.showLoading();
-    logger.debug('Quota', 'Fetching quota data...');
+    logger.debug("Quota", "Fetching quota data...");
     currentQuota = await quotaService.fetchQuota();
     lastFetchTime = Date.now();
-    logger.debug('Quota', 'Quota data received', {
+    logger.debug("Quota", "Quota data received", {
       usage: currentQuota?.usage,
       limit: currentQuota?.limit,
-      percentage: currentQuota?.percentage
+      percentage: currentQuota?.percentage,
     });
     statusBarManager.updateQuota(currentQuota);
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Quota', 'Error fetching quota', error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    logger.error("Quota", "Error fetching quota", error);
     statusBarManager.showError(`Failed to fetch quota: ${errorMessage}`);
     vscode.window.showErrorMessage(
-      `Claude Quota: ${errorMessage}. Please check your credentials in settings.`
+      `Claude Quota: ${errorMessage}. Please check your credentials in settings.`,
     );
   } finally {
     isFetching = false;
@@ -153,21 +168,21 @@ async function refreshQuota() {
 }
 
 function showQuotaDetails() {
-  const config = vscode.workspace.getConfiguration('claudeQuota');
-  const sessionKey = config.get<string>('sessionKey', '');
-  const organizationId = config.get<string>('organizationId', '');
+  const config = vscode.workspace.getConfiguration("claudeQuota");
+  const sessionKey = config.get<string>("sessionKey", "");
+  const organizationId = config.get<string>("organizationId", "");
 
   if (!sessionKey || !organizationId) {
     vscode.window
       .showInformationMessage(
-        'Claude.ai credentials not configured. Would you like to set them now?',
-        'Configure'
+        "Claude.ai credentials not configured. Would you like to set them now?",
+        "Configure",
       )
       .then((selection) => {
-        if (selection === 'Configure') {
+        if (selection === "Configure") {
           vscode.commands.executeCommand(
-            'workbench.action.openSettings',
-            'claudeQuota'
+            "workbench.action.openSettings",
+            "claudeQuota",
           );
         }
       });
@@ -175,14 +190,16 @@ function showQuotaDetails() {
   }
 
   if (!currentQuota) {
-    vscode.window.showInformationMessage(
-      'No quota data available. Click "Refresh" to fetch the latest data.',
-      'Refresh'
-    ).then((selection) => {
-      if (selection === 'Refresh') {
-        refreshQuota();
-      }
-    });
+    vscode.window
+      .showInformationMessage(
+        'No quota data available. Click "Refresh" to fetch the latest data.',
+        "Refresh",
+      )
+      .then((selection) => {
+        if (selection === "Refresh") {
+          refreshQuota();
+        }
+      });
     return;
   }
 
@@ -204,31 +221,33 @@ function showQuotaDetails() {
     }
   }
 
-  vscode.window.showInformationMessage(message, 'Refresh', 'Open Settings').then((selection) => {
-    if (selection === 'Refresh') {
-      refreshQuota();
-    } else if (selection === 'Open Settings') {
-      vscode.commands.executeCommand(
-        'workbench.action.openSettings',
-        'claudeQuota'
-      );
-    }
-  });
+  vscode.window
+    .showInformationMessage(message, "Refresh", "Open Settings")
+    .then((selection) => {
+      if (selection === "Refresh") {
+        refreshQuota();
+      } else if (selection === "Open Settings") {
+        vscode.commands.executeCommand(
+          "workbench.action.openSettings",
+          "claudeQuota",
+        );
+      }
+    });
 }
 
 function handleConfigurationChange() {
-  logger.info('Config', 'Configuration changed, reloading...');
-  const config = vscode.workspace.getConfiguration('claudeQuota');
-  const sessionKey = config.get<string>('sessionKey', '');
-  const organizationId = config.get<string>('organizationId', '');
-  const showInStatusBar = config.get<boolean>('showInStatusBar', true);
-  const usagePeriod = config.get<'5-hour' | '7-day'>('usagePeriod', '5-hour');
+  logger.info("Config", "Configuration changed, reloading...");
+  const config = vscode.workspace.getConfiguration("claudeQuota");
+  const sessionKey = config.get<string>("sessionKey", "");
+  const organizationId = config.get<string>("organizationId", "");
+  const showInStatusBar = config.get<boolean>("showInStatusBar", true);
+  const usagePeriod = config.get<"5-hour" | "7-day">("usagePeriod", "5-hour");
 
-  logger.debug('Config', 'New configuration', {
+  logger.debug("Config", "New configuration", {
     hasSessionKey: !!sessionKey,
     hasOrganizationId: !!organizationId,
     showInStatusBar,
-    usagePeriod
+    usagePeriod,
   });
 
   if (quotaService) {
@@ -248,37 +267,43 @@ function handleConfigurationChange() {
   setupAutoRefresh();
 
   // Trigger refresh - rate limiting will prevent excessive calls
-  logger.debug('Config', 'Triggering quota refresh');
+  logger.debug("Config", "Triggering quota refresh");
   refreshQuota();
 }
 
 function setupAutoRefresh() {
   // Clear any existing timer first
   if (refreshTimer) {
-    logger.debug('AutoRefresh', 'Clearing existing auto-refresh timer');
+    logger.debug("AutoRefresh", "Clearing existing auto-refresh timer");
     clearInterval(refreshTimer);
     refreshTimer = null;
   }
 
-  const config = vscode.workspace.getConfiguration('claudeQuota');
-  const refreshInterval = config.get<number>('refreshInterval', 300000);
+  const config = vscode.workspace.getConfiguration("claudeQuota");
+  const refreshInterval = config.get<number>("refreshInterval", 300000);
 
   // Don't set up auto-refresh if interval is less than minimum or disabled
   if (refreshInterval <= 0) {
-    logger.debug('AutoRefresh', 'Auto-refresh disabled (interval <= 0)');
+    logger.debug("AutoRefresh", "Auto-refresh disabled (interval <= 0)");
     return;
   }
 
   // Ensure refresh interval is at least MIN_FETCH_INTERVAL
   if (refreshInterval < MIN_FETCH_INTERVAL) {
-    logger.warn('AutoRefresh', `Refresh interval (${refreshInterval}ms) is less than minimum (${MIN_FETCH_INTERVAL}ms). Auto-refresh disabled.`);
+    logger.warn(
+      "AutoRefresh",
+      `Refresh interval (${refreshInterval}ms) is less than minimum (${MIN_FETCH_INTERVAL}ms). Auto-refresh disabled.`,
+    );
     return;
   }
 
-  logger.debug('AutoRefresh', `Setting up auto-refresh with interval: ${refreshInterval}ms (${refreshInterval / 1000}s)`);
+  logger.debug(
+    "AutoRefresh",
+    `Setting up auto-refresh with interval: ${refreshInterval}ms (${refreshInterval / 1000}s)`,
+  );
 
   refreshTimer = setInterval(() => {
-    logger.debug('AutoRefresh', 'Auto-refresh triggered');
+    logger.debug("AutoRefresh", "Auto-refresh triggered");
     refreshQuota();
   }, refreshInterval);
 }
@@ -288,7 +313,7 @@ function formatNumber(num: number): string {
 }
 
 export async function deactivate() {
-  logger.info('Extension', 'Claude Quota Tracker deactivating...');
+  logger.info("Extension", "Claude Quota Tracker deactivating...");
 
   if (refreshTimer) {
     clearInterval(refreshTimer);
@@ -304,5 +329,5 @@ export async function deactivate() {
     await quotaService.dispose();
   }
 
-  logger.info('Extension', 'Claude Quota Tracker deactivated');
+  logger.info("Extension", "Claude Quota Tracker deactivated");
 }
