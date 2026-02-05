@@ -6,7 +6,7 @@ All notable changes to the "Claude Quota Tracker" extension will be documented i
 
 ### Changed
 
-- **Headless Browser**: Switched Playwright quota requests to true headless mode (`--headless=new` flag), eliminating the visible browser window on fetch
+- **Headless Browser**: Switched Playwright quota requests to true headless and eliminating the visible browser window on fetch
 - **Code Formatting**: Ran Prettier across the entire codebase for consistent style (quotes, trailing commas, indentation)
 - **Default Refresh Interval**: Decreased from 10 minutes back to 5 minutes (300000ms)
 
