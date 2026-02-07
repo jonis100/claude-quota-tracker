@@ -63,7 +63,7 @@
         "claudeQuota.refreshInterval": {
           "type": "number",
           "default": 300000,
-          "description": "Auto-refresh interval in milliseconds (default: 5 minutes)",
+          "description": "Auto-refresh interval in milliseconds (default: 5 minutes). Shorter intervals use more resources. Minimum for auto-refresh is 10000ms (10s).",
           "order": 3
         },
         "claudeQuota.showInStatusBar": {
