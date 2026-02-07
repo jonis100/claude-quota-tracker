@@ -2,7 +2,7 @@
   "name": "claude-quota-tracker",
   "displayName": "Claude Quota Tracker",
   "description": "Track your Claude.ai subscription usage with real-time quota monitoring in VS Code status bar",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "publisher": "yonis",
   "icon": "assets/CQT-128c.png",
   "repository": {
@@ -62,8 +62,8 @@
         },
         "claudeQuota.refreshInterval": {
           "type": "number",
-          "default": 600000,
-          "description": "Auto-refresh interval in milliseconds (default: 10 minutes)",
+          "default": 300000,
+          "description": "Auto-refresh interval in milliseconds (default: 5 minutes). Shorter intervals use more resources.",
           "order": 3
         },
         "claudeQuota.showInStatusBar": {
