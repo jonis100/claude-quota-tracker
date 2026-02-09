@@ -2,6 +2,23 @@
 
 All notable changes to the "Claude Quota Tracker" extension will be documented in this file.
 
+## [1.0.4] - 2026-02-09
+
+### Fixed
+
+- **code-server Support**: Fixed Chromium installation failing in code-server environments
+  - Installation command now runs from the extension's directory instead of VS Code's process directory
+  - Added extension path context to chromiumService for proper node_modules resolution
+  - Enhanced debug logging to show installation working directory
+  - Resolves "install dependencies first" error in code-server
+
+### Technical Details
+
+- Added `setExtensionPath()` function to chromiumService for storing extension installation path
+- Modified `installChromium()` to use `cwd` option pointing to extension directory
+- Extension path is automatically set during activation from `context.extensionPath`
+- Maintains backward compatibility (works even if path not set)
+
 ## [1.0.3] - 2026-02-05
 
 ### Changed

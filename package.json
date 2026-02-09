@@ -2,7 +2,7 @@
   "name": "claude-quota-tracker",
   "displayName": "Claude Quota Tracker",
   "description": "Track your Claude.ai subscription usage with real-time quota monitoring in VS Code status bar",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "publisher": "yonis",
   "icon": "assets/CQT-128c.png",
   "repository": {

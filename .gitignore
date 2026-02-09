@@ -4,3 +4,4 @@ out
 .vscode-test
 .DS_Store
 .env*
+debug-api-test*
