@@ -74,15 +74,6 @@ export async function installChromium(
   try {
     logger.info("ChromiumService", "Starting Chromium installation...");
 
-    if (extensionPath) {
-      logger.debug("ChromiumService", `Using extension path: ${extensionPath}`);
-    } else {
-      logger.warn(
-        "ChromiumService",
-        "Extension path not set - installation may fail in code-server environments",
-      );
-    }
-
     onProgress?.("Installing Chromium browser...");
     const command = "npx playwright install chromium";
 
@@ -94,7 +85,12 @@ export async function installChromium(
       execOptions.cwd = extensionPath;
       logger.debug(
         "ChromiumService",
-        `Running installation from: ${extensionPath}`,
+        `Running installation from extension path: ${extensionPath}`,
+      );
+    } else {
+      logger.warn(
+        "ChromiumService",
+        "Extension path not set - installation may fail in code-server environments",
       );
     }
 
