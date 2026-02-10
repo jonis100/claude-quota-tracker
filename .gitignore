@@ -1,6 +1,8 @@
 node_modules
 out
 *.vsix
+.claude
 .vscode-test
 .DS_Store
 .env*
+debug-api-test*

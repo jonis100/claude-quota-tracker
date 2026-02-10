@@ -19,6 +19,13 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
+let extensionPath: string | undefined;
+
+export function setExtensionPath(path: string): void {
+  extensionPath = path;
+  logger.debug("ChromiumService", `Extension path set: ${path}`);
+}
+
 export async function checkChromiumAvailability(): Promise<boolean> {
   try {
     const executablePath = chromium.executablePath();
@@ -66,11 +73,28 @@ export async function installChromium(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     logger.info("ChromiumService", "Starting Chromium installation...");
+
     onProgress?.("Installing Chromium browser...");
     const command = "npx playwright install chromium";
-    const { stdout, stderr } = await execAsync(command, {
+
+    const execOptions: Parameters<typeof execAsync>[1] = {
       maxBuffer: 10 * 1024 * 1024,
-    });
+    };
+
+    if (extensionPath) {
+      execOptions.cwd = extensionPath;
+      logger.debug(
+        "ChromiumService",
+        `Running installation from extension path: ${extensionPath}`,
+      );
+    } else {
+      logger.warn(
+        "ChromiumService",
+        "Extension path not set - installation may fail in code-server environments",
+      );
+    }
+
+    const { stdout, stderr } = await execAsync(command, execOptions);
 
     logger.debug("ChromiumService", "Installation output:", { stdout, stderr });
 
@@ -94,6 +118,7 @@ export async function installChromium(
       error instanceof Error ? error.message : "Unknown error";
     logger.error("ChromiumService", "Failed to install Chromium", {
       error: errorMessage,
+      extensionPath: extensionPath || "not set",
     });
     onProgress?.(`Installation failed: ${errorMessage}`);
     return { success: false, error: errorMessage };

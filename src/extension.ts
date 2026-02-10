@@ -3,7 +3,10 @@ import { QuotaService } from "./core/quotaService";
 import { StatusBarManager } from "./ui/statusBar";
 import { logger } from "./utils/logger";
 import { QuotaInfo } from "./utils/types";
-import { ensureChromiumAvailable } from "./utils/chromiumService";
+import {
+  ensureChromiumAvailable,
+  setExtensionPath,
+} from "./utils/chromiumService";
 
 let quotaService: QuotaService | null = null;
 let statusBarManager: StatusBarManager | null = null;
@@ -16,6 +19,10 @@ const MIN_FETCH_INTERVAL = 10000;
 
 export function activate(context: vscode.ExtensionContext) {
   logger.init(context);
+
+  setExtensionPath(context.extensionPath);
+  logger.debug("Extension", `Extension path: ${context.extensionPath}`);
+
   logger.section("Extension", "Claude Quota Tracker Activating");
   logger.info("Extension", `VS Code Version: ${vscode.version}`);
   logger.info(
