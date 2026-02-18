@@ -126,6 +126,16 @@ Access via Command Palette (Ctrl/Cmd + Shift + P):
 
 If you see this error, click on it and choose "Install Now" to automatically install Chromium. Alternatively, run `npx playwright install chromium` in your terminal.
 
+### Chromium fails to launch (containers / minimal servers)
+
+On minimal environments like LXC containers or headless servers, Chromium may download but fail to launch due to missing system libraries. Install the browser with its OS dependencies:
+
+```bash
+npx playwright install --with-deps chromium
+```
+
+This runs `apt-get install` for the required libraries (libnss3, libgbm1, libasound2, etc.). Requires root or sudo.
+
 ### "Session key and organization ID not configured"
 
 Make sure you've set both credentials in Settings → Claude Quota

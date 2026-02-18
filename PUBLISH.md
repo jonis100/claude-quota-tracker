@@ -60,7 +60,7 @@ This will create a `.vsix` file (e.g., `claude-quota-tracker-1.0.1.vsix`)
 ### Step 3: Test the Package Locally
 
 ```bash
-code --install-extension claude-quota-tracker-1.0.1.vsix
+code --install-extension claude-quota-tracker-1.0.5.vsix
 ```
 
 ### Step 4: Publish to Marketplace

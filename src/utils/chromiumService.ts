@@ -75,22 +75,25 @@ export async function installChromium(
     logger.info("ChromiumService", "Starting Chromium installation...");
 
     onProgress?.("Installing Chromium browser...");
-    const command = "npx playwright install chromium";
 
     const execOptions: Parameters<typeof execAsync>[1] = {
       maxBuffer: 10 * 1024 * 1024,
     };
 
+    let command: string;
     if (extensionPath) {
       execOptions.cwd = extensionPath;
+      const cliPath = `${extensionPath}/node_modules/playwright-core/cli.js`;
+      command = `node "${cliPath}" install chromium`;
       logger.debug(
         "ChromiumService",
         `Running installation from extension path: ${extensionPath}`,
       );
     } else {
+      command = "npx playwright install chromium";
       logger.warn(
         "ChromiumService",
-        "Extension path not set - installation may fail in code-server environments",
+        "Extension path not set - falling back to npx playwright install chromium",
       );
     }
 
