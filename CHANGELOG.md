@@ -2,7 +2,7 @@
 
 All notable changes to the "Claude Quota Tracker" extension will be documented in this file.
 
-## [1.0.5] - 2026-02-18
+## [1.0.5] - 2026-02-19
 
 ### Fixed
 

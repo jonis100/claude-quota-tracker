@@ -16,6 +16,7 @@ import { chromium } from "playwright-core";
 import { logger } from "./logger";
 import { exec } from "child_process";
 import { promisify } from "util";
+import * as path from "path";
 
 const execAsync = promisify(exec);
 
@@ -83,7 +84,7 @@ export async function installChromium(
     let command: string;
     if (extensionPath) {
       execOptions.cwd = extensionPath;
-      const cliPath = `${extensionPath}/node_modules/playwright-core/cli.js`;
+      const cliPath = path.join(extensionPath, "node_modules", "playwright-core", "cli.js");
       command = `node "${cliPath}" install chromium`;
       logger.debug(
         "ChromiumService",
