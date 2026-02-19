@@ -2,6 +2,14 @@
 
 All notable changes to the "Claude Quota Tracker" extension will be documented in this file.
 
+## [1.0.5] - 2026-02-19
+
+### Fixed
+
+- **Chromium Installation** (issues [#11](https://github.com/jonis100/claude-quota-tracker/issues/11), [#13](https://github.com/jonis100/claude-quota-tracker/issues/13)): Fixed Chromium installation failing with `playwright-core: not found`
+  - The extension now invokes `playwright-core`'s bundled CLI directly via `node "<extensionPath>/node_modules/playwright-core/cli.js" install chromium` instead of relying on `npx playwright`
+  - Falls back to `npx playwright install chromium` when extension path is not available
+
 ## [1.0.4] - 2026-02-09
 
 ### Fixed
