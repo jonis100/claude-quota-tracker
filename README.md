@@ -116,7 +116,7 @@ Access via Command Palette (Ctrl/Cmd + Shift + P):
 ## Privacy & Security
 
 - Your credentials are stored locally in VS Code settings
-- All requests are made directly to Claude.ai official API
+- All requests are made directly to Claude.ai — no third-party servers are involved
 - No data is collected or sent to third parties
 - **Note**: Your session key is sensitive - treat it like a password
 
@@ -152,8 +152,8 @@ Your session key may have expired. Get a fresh session key from browser cookies.
 
 ## Known Issues
 
-- A tiny browser window (1x1 pixel) positioned off-screen may briefly appear when fetching data (required to bypass Cloudflare protection)
 - Session keys expire periodically and need to be updated manually
+- The extension may break without warning if Anthropic changes their internal APIs (see footer disclaimer)
 
 ## Release Notes
 
@@ -165,6 +165,6 @@ For issues or feature requests, please visit the GitHub repository.
 
 ---
 
-**Note**: This extension is not officially affiliated with Anthropic. It's a community-built tool to help developers track their Claude.ai subscription usage.
+**Disclaimer**: This extension is not officially affiliated with Anthropic. It relies on unofficial, undocumented Claude.ai internal APIs and browser session cookies. Anthropic may change or remove these at any time, which could break the extension without warning. Use at your own discretion.
 
 **Enjoy tracking your Claude usage!**
