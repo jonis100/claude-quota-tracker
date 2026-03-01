@@ -1,5 +1,10 @@
 # Claude Quota Tracker
 
+[![VS Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/yonis.claude-quota-tracker?label=VS%20Marketplace&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=yonis.claude-quota-tracker)
+[![Open VSX Downloads](https://img.shields.io/open-vsx/dt/yonis/claude-quota-tracker?label=Open%20VSX&logo=vscodium)](https://open-vsx.org/extension/yonis/claude-quota-tracker)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![GitHub Release](https://img.shields.io/github/v/release/jonis100/claude-quota-tracker?label=release)](https://github.com/jonis100/claude-quota-tracker/releases/latest)
+
 Track your Claude.ai subscription usage directly in VS Code with real-time quota monitoring.
 
 **Perfect companion for [Claude Code](https://marketplace.visualstudio.com/items?itemName=Anthropic.claude-code) users!** Stay on top of your usage while coding with Claude's AI assistance.
